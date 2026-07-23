@@ -1,48 +1,51 @@
-# 🕵️ Kernel-Level Sniffer (eBPF & Rust) — Branch: `chaitanya`
+# 🛡️ API-Sentinel - Runtime BOLA & Shadow API Detection Engine
 
-This branch contains the implementation of the **Kernel-Level Sniffer** component of API-Sentinel. Sitting at the operating system level, this module utilizes eBPF to capture and inspect raw network/API traffic with zero modification to the microservices and negligible performance overhead.
+[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![eBPF](https://img.shields.io/badge/eBPF-Linux-success?style=for-the-badge)](https://ebpf.io/)
 
-## 🛠️ Tech Stack & eBPF Framework
-
-- **Language**: Rust
-- **eBPF Library**: **[Aya framework](https://aya-rs.dev/)**
-    - _Why Aya?_ Aya allows us to write both the kernel-space eBPF programs and the user-space orchestrator/loader entirely in Rust, avoiding standard C dependencies (such as libbpf) and delivering robust compile-time safety.
+**API-Sentinel** is an advanced API security platform designed to provide real-time monitoring and protection for modern APIs. It detects **Broken Object Level Authorization (BOLA)** attacks, discovers **Shadow APIs**, analyzes authorization behavior, and helps organizations secure their APIs through continuous runtime monitoring and interactive security analytics.
 
 ---
 
-## 📋 Weekly Development Plan & Checklist
+## 🚀 Key Features
 
-The following is the week-by-week roadmap for the low-level engineering tasks on this branch:
+- **🔍 Runtime API Monitoring**: Capture and analyze live API traffic in real time using eBPF with minimal system overhead.
+- **🛡️ BOLA Detection**: Detect Broken Object Level Authorization attacks and unauthorized access to protected resources.
+- **🌐 Shadow API Discovery**: Automatically identify undocumented, deprecated, or rogue API endpoints.
+- **👤 Behavioral Authorization Analysis**: Monitor user access patterns and detect abnormal API behavior.
+- **⚠️ Real-Time Threat Alerts**: Generate instant notifications for suspicious API requests and security incidents.
+- **📊 Interactive Dashboard**: Visualize API inventory, attack trends, security metrics, and live threat analytics.
+- **📋 Security Reporting**: Generate comprehensive reports for detected vulnerabilities and API security assessments.
+- **🔒 OWASP API Security Compliance**: Monitor and map threats based on the OWASP API Security Top 10 framework.
 
-### 📍 Week 1: Traffic Interception
+---
 
-- [x] Set up the Rust eBPF development environment (LLVM, Clang, cargo-generate, Aya template).
-- [ ] Write an eBPF program in Rust using **Aya** to attach to kernel socket traces.
-- [ ] Passively capture raw HTTP/REST network traffic from a mock microservice.
-- [ ] Stream the intercepted traffic from kernel space to user space via eBPF maps (e.g., RingBuf).
+## 🛠️ Tech Stack
 
-### 📍 Week 2: Discovery Pipeline
+### Runtime Monitoring
+- **Technology**: eBPF
+- **Language**: Rust
+- **Platform**: Linux Kernel
 
-- [ ] Implement logic to process observed raw traffic and automatically reconstruct endpoint patterns.
-- [ ] Generate OpenAPI schemas dynamically from the intercepted payload data.
-- [ ] Flag endpoints that do not exist in the official repository (Shadow API detection).
+### Backend
+- **Framework**: FastAPI (Python)
+- **Database**: SQLite / PostgreSQL (SQLAlchemy ORM)
+- **Security**: JWT Authentication & Pydantic Validation
 
-### 🔍 Mid-Project Review: Performance Audit
+### Frontend
+- **Framework**: React 18 with Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **HTTP Client**: Axios
 
-- [ ] Conduct a performance audit to benchmark latency.
-- [ ] Validate and prove that the eBPF sidecar agent adds less than **5 milliseconds** of latency to API requests.
-
-### 📍 Week 3: Enforcement Mode
-
-- [ ] Upgrade the eBPF sniffer program from passive monitoring to active blocking mode.
-- [ ] Intercept and dynamically drop packets that violate defined property-level access controls (blocking BOLA/BFLA attacks at the execution level).
-
-### 📍 Week 4: Data Masking
-
-- [ ] Implement real-time payload sanitization in the sniffer.
-- [ ] Automatically strip out PII (Personally Identifiable Information) from the captured HTTP request/response payloads before forwarding them to the analytics dashboard.
-
-### 🏆 Final Review
-
-- [ ] Complete end-to-end integration with the backend and frontend.
-- [ ] Validate overall stability, safety, and performance constraints.
+### Security & Integrations
+- OpenAPI / Swagger
+- Docker & Docker Compose
+- Git & GitHub
+- OWASP API Security Top 10

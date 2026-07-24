@@ -1,0 +1,17 @@
+[package]
+name = "module1_kprobe-ebpf"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+module1_kprobe-common = { path = "../module1_kprobe-common" }
+
+aya-ebpf = { workspace = true }
+aya-log-ebpf = { workspace = true }
+
+[build-dependencies]
+which = { workspace = true }
+
+[[bin]]
+name = "module1_kprobe"
+path = "src/main.rs"

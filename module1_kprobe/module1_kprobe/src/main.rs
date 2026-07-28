@@ -1,7 +1,14 @@
-use aya::programs::KProbe;
-#[rustfmt::skip]
+use aya::{
+    programs::KProbe,
+    maps::perf::{PerfEventArray, PerfEvent},
+    util::online_cpus,
+};
 use log::{debug, warn};
 use tokio::signal;
+use tokio::io::unix::AsyncFd;
+use tokio::io::Interest;
+use std::net::Ipv4Addr;
+use module1_kprobe_common::TcpEvent;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -26,26 +33,69 @@ async fn main() -> anyhow::Result<()> {
         env!("OUT_DIR"),
         "/module1_kprobe"
     )))?;
-    match aya_log::EbpfLogger::init(&mut ebpf) {
-        Err(e) => {
-            // This can happen if you remove all log statements from your eBPF program.
-            warn!("failed to initialize eBPF logger: {e}");
-        }
-        Ok(logger) => {
-            let mut logger =
-                tokio::io::unix::AsyncFd::with_interest(logger, tokio::io::Interest::READABLE)?;
-            tokio::task::spawn(async move {
-                loop {
-                    let mut guard = logger.readable_mut().await.unwrap();
-                    guard.get_inner_mut().flush();
-                    guard.clear_ready();
-                }
-            });
-        }
+    let mut perf_array = PerfEventArray::try_from(ebpf.take_map("TCP_EVENTS").unwrap())?;
+
+    for cpu_id in online_cpus().unwrap() {
+        let buf = perf_array.open(cpu_id, None)?;
+
+        tokio::task::spawn(async move {
+            let mut async_buf = AsyncFd::with_interest(buf, Interest::READABLE).unwrap();
+
+            loop {
+                let mut guard = async_buf.readable_mut().await.unwrap();
+                guard.get_inner_mut().for_each(|event| {
+                    match event {
+                        PerfEvent::Sample { head, tail } => {
+                            let mut event_bytes = Vec::with_capacity(head.len() + tail.len());
+                            event_bytes.extend_from_slice(head);
+                            event_bytes.extend_from_slice(tail);
+                            
+                            if event_bytes.len() < std::mem::size_of::<TcpEvent>() {
+                                return;
+                            }
+                            
+                            let ptr = event_bytes.as_ptr() as *const TcpEvent;
+                            let event = unsafe { ptr.read_unaligned() };
+                            
+                            let src_ip = Ipv4Addr::from(event.src_ip.to_be());
+                            let dest_ip = Ipv4Addr::from(event.dest_ip.to_be());
+                            
+                            let direction = if event.direction == 0 { "send" } else { "recv" };
+                            let payload_len = event.payload_len as usize;
+                            let payload = &event.payload[..payload_len];
+                            
+                            // Simple hex encoding
+                            let mut payload_hex = String::with_capacity(payload_len * 2);
+                            for b in payload {
+                                payload_hex.push_str(&format!("{:02x}", b));
+                            }
+                            
+                            // Output structured JSON
+                            println!(
+                                "{{\"src_ip\": \"{}\", \"dest_ip\": \"{}\", \"src_port\": {}, \"dest_port\": {}, \"direction\": \"{}\", \"payload_len\": {}, \"payload_hex\": \"{}\"}}",
+                                src_ip, dest_ip, event.src_port, event.dest_port, direction, payload_len, payload_hex
+                            );
+                        }
+                        PerfEvent::Lost { count } => {
+                            warn!("Lost {} events", count);
+                        }
+                    }
+                });
+                guard.clear_ready();
+            }
+        });
     }
     let program: &mut KProbe = ebpf.program_mut("module1_kprobe").unwrap().try_into()?;
     program.load()?;
     program.attach("tcp_sendmsg", 0)?;
+
+    let recv_entry: &mut KProbe = ebpf.program_mut("module1_kprobe_recv").unwrap().try_into()?;
+    recv_entry.load()?;
+    recv_entry.attach("tcp_recvmsg", 0)?;
+
+    let recv_exit: &mut KProbe = ebpf.program_mut("module1_kretprobe_recv").unwrap().try_into()?;
+    recv_exit.load()?;
+    recv_exit.attach("tcp_recvmsg", 0)?;
 
     let ctrl_c = signal::ctrl_c();
     println!("Waiting for Ctrl-C...");

@@ -18,8 +18,8 @@ The following is the week-by-week roadmap for the low-level engineering tasks on
 
 - [x] Set up the Rust eBPF development environment (LLVM, Clang, cargo-generate, Aya template).
 - [x] Write an eBPF program in Rust using **Aya** to attach to kernel socket traces.
-- [ ] Passively capture raw HTTP/REST network traffic from a mock microservice.
-- [ ] Stream the intercepted traffic from kernel space to user space via eBPF maps (e.g., RingBuf).
+- [x] Passively capture raw HTTP/REST network traffic from a mock microservice.
+- [x] Stream the intercepted traffic from kernel space to user space via eBPF maps (e.g., RingBuf).
 
 ### 📍 Week 2: Discovery Pipeline
 

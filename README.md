@@ -1,51 +1,57 @@
-# 🛡️ API-Sentinel - Runtime BOLA & Shadow API Detection Engine
+# API-Sentinel
 
-[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![eBPF](https://img.shields.io/badge/eBPF-Linux-success?style=for-the-badge)](https://ebpf.io/)
+API-Sentinel is an API runtime security platform for detecting BOLA, shadow APIs, zombie APIs, API abuse, suspicious clients, and behavioral anomalies.
 
-**API-Sentinel** is an advanced API security platform designed to provide real-time monitoring and protection for modern APIs. It detects **Broken Object Level Authorization (BOLA)** attacks, discovers **Shadow APIs**, analyzes authorization behavior, and helps organizations secure their APIs through continuous runtime monitoring and interactive security analytics.
+## Current Backend Module
 
----
+The first delivery focuses on the backend platform core:
 
-## 🚀 Key Features
+- FastAPI application factory and router layout
+- SQLAlchemy models on SQLite with PostgreSQL-ready configuration
+- JWT authentication and RBAC dependencies
+- Request logging middleware with persistent SQLite storage
+- Enterprise BOLA heuristics engine with access graph learning and alert persistence
+- API inventory, alerting, and detector modules
+- Seeded mock users, orders, and admin roles for realistic testing
 
-- **🔍 Runtime API Monitoring**: Capture and analyze live API traffic in real time using eBPF with minimal system overhead.
-- **🛡️ BOLA Detection**: Detect Broken Object Level Authorization attacks and unauthorized access to protected resources.
-- **🌐 Shadow API Discovery**: Automatically identify undocumented, deprecated, or rogue API endpoints.
-- **👤 Behavioral Authorization Analysis**: Monitor user access patterns and detect abnormal API behavior.
-- **⚠️ Real-Time Threat Alerts**: Generate instant notifications for suspicious API requests and security incidents.
-- **📊 Interactive Dashboard**: Visualize API inventory, attack trends, security metrics, and live threat analytics.
-- **📋 Security Reporting**: Generate comprehensive reports for detected vulnerabilities and API security assessments.
-- **🔒 OWASP API Security Compliance**: Monitor and map threats based on the OWASP API Security Top 10 framework.
+## BOLA Detection Architecture
 
----
+```mermaid
+flowchart TD
+	A[API Request] --> B[Object Mapper]
+	B --> C[Access Graph]
+	C --> D[Behavior Analyzer]
+	D --> E[Risk Engine]
+	E --> F[Alert System]
+	F --> G[Dashboard / Security APIs]
+```
 
-## 🛠️ Tech Stack
+The BOLA engine now learns from historical API traffic, records normalized observations, builds a user-object graph with NetworkX, and writes critical detections to both the dedicated `bola_alerts` table and the existing alert pipeline for dashboard visibility.
 
-### Runtime Monitoring
-- **Technology**: eBPF
-- **Language**: Rust
-- **Platform**: Linux Kernel
+Security endpoints:
 
-### Backend
-- **Framework**: FastAPI (Python)
-- **Database**: SQLite / PostgreSQL (SQLAlchemy ORM)
-- **Security**: JWT Authentication & Pydantic Validation
+- `GET /api/security/bola-alerts`
+- `GET /api/security/user/{id}/access-map`
 
-### Frontend
-- **Framework**: React 18 with Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts
-- **HTTP Client**: Axios
+## Run
 
-### Security & Integrations
-- OpenAPI / Swagger
-- Docker & Docker Compose
-- Git & GitHub
-- OWASP API Security Top 10
+```bash
+uvicorn backend.app:app --reload
+```
+
+## Authentication Demo Accounts
+
+- `alice / password123` - user
+- `bob / secret456` - user
+- `nina / analyst789` - security_analyst
+- `devon / devpass321` - developer
+- `viewer / viewonly555` - viewer
+- `admin / Admin@9999` - admin
+
+### BOLA simulation
+
+The test suite now includes an attack simulation that exercises a normal read, then a cross-user object read, and verifies the resulting `Critical` BOLA alert.
+
+## Next Modules
+
+Frontend dashboard, analytics, and production deployment artifacts will be added after this backend module is confirmed.

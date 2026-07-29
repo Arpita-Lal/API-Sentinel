@@ -1,0 +1,80 @@
+2026-07-11T15:02:46+0530 | INFO | api-sentinel.middleware | request_id=257e4420b2694927beeb66ce36b50681 method=POST endpoint=/login status=200 duration_ms=133.16 user=anonymous ip=testclient
+2026-07-11T15:02:46+0530 | INFO | api-sentinel.middleware | request_id=6012942ab82c45ce9fb70f14a9c8f238 method=GET endpoint=/profile status=200 duration_ms=13.575 user=alice ip=testclient
+2026-07-11T15:02:46+0530 | INFO | api-sentinel.middleware | request_id=d51bd4a2c87c45929894811b713ddfd7 method=GET endpoint=/orders status=200 duration_ms=14.03 user=alice ip=testclient
+2026-07-11T15:02:46+0530 | INFO | api-sentinel.middleware | request_id=50375e86e09744f095806916e7c52cea method=GET endpoint=/orders/{order_id} status=403 duration_ms=7.757 user=alice ip=testclient
+2026-07-11T15:03:19+0530 | INFO | api-sentinel.middleware | request_id=21f870b311a44170a3c673287b204b34 method=POST endpoint=/login status=200 duration_ms=93.896 user=anonymous ip=testclient
+2026-07-11T15:03:19+0530 | INFO | api-sentinel.middleware | request_id=81164ceb115746768fb129c86dcd5734 method=GET endpoint=/orders/{order_id} status=403 duration_ms=14.182 user=alice ip=testclient
+2026-07-11T15:10:49+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-11T15:10:59+0530 | INFO | api-sentinel.middleware | request_id=6690914539044bf48684f1b6ece68f6d method=GET endpoint=/ status=200 duration_ms=15.381 user=anonymous ip=127.0.0.1
+2026-07-11T15:10:59+0530 | INFO | api-sentinel.middleware | request_id=afa70bbfa10b4668b0c42bd86342e0e1 method=GET endpoint=/favicon.ico status=404 duration_ms=0.497 user=anonymous ip=127.0.0.1
+2026-07-11T15:11:14+0530 | INFO | api-sentinel.middleware | request_id=43a8c09f0e6a48339d53127efb391311 method=GET endpoint=/ status=200 duration_ms=1.334 user=anonymous ip=127.0.0.1
+2026-07-11T15:11:40+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-11T15:11:44+0530 | INFO | api-sentinel.middleware | request_id=8d7535d8d44d4c1498a1f560c6999a95 method=GET endpoint=/ status=200 duration_ms=83.489 user=anonymous ip=127.0.0.1
+2026-07-11T15:11:50+0530 | INFO | api-sentinel.middleware | request_id=75fa8c7e3d834a46ac5b1ab66316e3ea method=POST endpoint=/login status=200 duration_ms=100.44 user=anonymous ip=testclient
+2026-07-11T15:11:54+0530 | INFO | api-sentinel.middleware | request_id=55fee2056b474710ab72deec16af564c method=GET endpoint=/api/stats status=200 duration_ms=13.013 user=admin ip=127.0.0.1
+2026-07-11T15:11:54+0530 | INFO | api-sentinel.middleware | request_id=5c51a5210c5c41c49d673727793889bd method=GET endpoint=/api/alerts status=200 duration_ms=7.394 user=admin ip=127.0.0.1
+2026-07-11T15:11:54+0530 | INFO | api-sentinel.middleware | request_id=dff2c068526d4aca80d8538c6e96ecfd method=GET endpoint=/api/logs status=200 duration_ms=5.201 user=admin ip=127.0.0.1
+2026-07-11T15:11:54+0530 | INFO | api-sentinel.middleware | request_id=691bdb5ee5094e489a13535f32d84f1f method=GET endpoint=/api/inventory status=200 duration_ms=5.873 user=admin ip=127.0.0.1
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=9d997d2d088a496798753fe606d8d002 method=POST endpoint=/login status=200 duration_ms=100.489 user=anonymous ip=testclient
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=157068ff58f14647a88052a704aedd12 method=POST endpoint=/login status=200 duration_ms=92.714 user=anonymous ip=testclient
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=9b27ab67ed514003b05a02495e688588 method=GET endpoint=/profile status=200 duration_ms=10.885 user=alice ip=testclient
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=9ee7bf6210654277b9ab5a89e9d510ee method=GET endpoint=/orders status=200 duration_ms=13.828 user=alice ip=testclient
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=72b82514ee494fd5add6907987cf988d method=GET endpoint=/orders/{order_id} status=403 duration_ms=6.157 user=alice ip=testclient
+2026-07-11T15:12:02+0530 | INFO | api-sentinel.middleware | request_id=c0ebc6cbfef440c6b427f8d6db53e322 method=GET endpoint=/health status=200 duration_ms=6.869 user=anonymous ip=testclient
+2026-07-11T15:12:03+0530 | INFO | api-sentinel.middleware | request_id=08e12291c3494a92bfa2c758ebb529bb method=GET endpoint=/api/inventory status=200 duration_ms=6.592 user=admin ip=testclient
+2026-07-11T15:12:05+0530 | INFO | api-sentinel.middleware | request_id=374b5b094eec4f7f8b806996a2e963e0 method=GET endpoint=/api/stats status=200 duration_ms=5.103 user=admin ip=127.0.0.1
+2026-07-11T15:12:05+0530 | INFO | api-sentinel.middleware | request_id=365f72319fb34966b25226f6fb508b4e method=GET endpoint=/api/alerts status=200 duration_ms=6.223 user=admin ip=127.0.0.1
+2026-07-11T15:12:05+0530 | INFO | api-sentinel.middleware | request_id=3322bc41eeae45f9a73580759156d6cb method=GET endpoint=/api/logs status=200 duration_ms=5.319 user=admin ip=127.0.0.1
+2026-07-11T15:12:05+0530 | INFO | api-sentinel.middleware | request_id=26f63a00c6464154a95662b615c45333 method=GET endpoint=/api/inventory status=200 duration_ms=5.299 user=admin ip=127.0.0.1
+2026-07-11T15:12:33+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=d1325635f72844d6b266066b9ff0f5c5 method=POST endpoint=/login status=200 duration_ms=105.604 user=anonymous ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=f68e10cca0d34b1ba262c673f02467d9 method=POST endpoint=/login status=200 duration_ms=98.873 user=anonymous ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=1cb5b887205b417291ff56393200eb1c method=GET endpoint=/profile status=200 duration_ms=7.721 user=alice ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=e8c56eb4900745da8f1e08fb80414ccc method=GET endpoint=/orders status=200 duration_ms=12.308 user=alice ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=f833081a15f04ed2841517f529e8711f method=GET endpoint=/orders/{order_id} status=403 duration_ms=7.771 user=alice ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=1cf844b5dd8b4a0dba06b99a4d7473f2 method=GET endpoint=/api/inventory status=200 duration_ms=13.462 user=admin ip=testclient
+2026-07-11T15:12:53+0530 | INFO | api-sentinel.middleware | request_id=016b5a07c7f345f5acc94705a2052ca4 method=GET endpoint=/api/logs status=200 duration_ms=7.216 user=admin ip=testclient
+2026-07-11T15:12:58+0530 | INFO | api-sentinel.middleware | request_id=b421dcfdceff4026af07b511065cbec0 method=GET endpoint=/api/stats status=200 duration_ms=38.128 user=admin ip=127.0.0.1
+2026-07-11T15:12:58+0530 | INFO | api-sentinel.middleware | request_id=ab4cac8db7e74d9cada1e8a7cb036a88 method=GET endpoint=/api/alerts status=200 duration_ms=12.844 user=admin ip=127.0.0.1
+2026-07-11T15:12:58+0530 | INFO | api-sentinel.middleware | request_id=34f2348303ce4d7182f6770f227dd4df method=GET endpoint=/api/logs status=200 duration_ms=9.997 user=admin ip=127.0.0.1
+2026-07-11T15:12:58+0530 | INFO | api-sentinel.middleware | request_id=8c2b5cfd61194d6f854e15dc7e334e21 method=GET endpoint=/api/inventory status=200 duration_ms=8.377 user=admin ip=127.0.0.1
+2026-07-11T15:13:49+0530 | INFO | api-sentinel.middleware | request_id=59cd304deb254df59905131a091a764b method=GET endpoint=/ status=200 duration_ms=57.66 user=anonymous ip=127.0.0.1
+2026-07-11T15:14:06+0530 | INFO | api-sentinel.middleware | request_id=9ebb4215ff8f41a9942c376223afe7d2 method=GET endpoint=/favicon.ico status=404 duration_ms=0.637 user=anonymous ip=127.0.0.1
+2026-07-29T15:28:53+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:28:54+0530 | INFO | api-sentinel.middleware | request_id=afc153c2499c4334b6654b6a28aea150 method=POST endpoint=/login status=200 duration_ms=170.063 user=anonymous ip=testclient
+2026-07-29T15:29:40+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:29:40+0530 | INFO | api-sentinel.middleware | request_id=086c2f700eb44297b9202037c6806a98 method=POST endpoint=/login status=200 duration_ms=102.573 user=anonymous ip=testclient
+2026-07-29T15:29:40+0530 | INFO | api-sentinel.middleware | request_id=78698b9aa5f74e9ea41621b7a6de252d method=POST endpoint=/login status=200 duration_ms=96.828 user=anonymous ip=testclient
+2026-07-29T15:29:41+0530 | INFO | api-sentinel.middleware | request_id=60b3e31a514048439f850866ae57cbb3 method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=21.968 user=admin ip=testclient
+2026-07-29T15:29:41+0530 | INFO | api-sentinel.middleware | request_id=39581801dcdb47a08e72ee946fbfc13d method=GET endpoint=/orders/{order_id} status=200 duration_ms=8.665 user=alice ip=testclient
+2026-07-29T15:29:41+0530 | INFO | api-sentinel.middleware | request_id=4bcf452e3c4c41fe8b59b97544020736 method=GET endpoint=/orders/{order_id} status=403 duration_ms=5.798 user=alice ip=testclient
+2026-07-29T15:30:06+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:30:06+0530 | INFO | api-sentinel.middleware | request_id=32988cd17be04412aa18adb98c75a7a9 method=POST endpoint=/login status=200 duration_ms=97.207 user=anonymous ip=testclient
+2026-07-29T15:30:07+0530 | INFO | api-sentinel.middleware | request_id=a41e540ed74940dbbca7d309b8f8f559 method=POST endpoint=/login status=200 duration_ms=103.679 user=anonymous ip=testclient
+2026-07-29T15:30:07+0530 | INFO | api-sentinel.middleware | request_id=23dcebd10bba40d5a55312449330a39e method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=23.508 user=admin ip=testclient
+2026-07-29T15:30:07+0530 | INFO | api-sentinel.middleware | request_id=c2a21442376e4036a65f8c658c7cf0c1 method=GET endpoint=/orders/{order_id} status=200 duration_ms=7.713 user=alice ip=testclient
+2026-07-29T15:30:07+0530 | INFO | api-sentinel.middleware | request_id=00b1a3d4006a41529e25b5e873a27d7e method=GET endpoint=/orders/{order_id} status=403 duration_ms=5.546 user=alice ip=testclient
+2026-07-29T15:30:07+0530 | INFO | api-sentinel.middleware | request_id=c93107392571411f9c81010a6a6979b9 method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=3.945 user=admin ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=d3563fbf0d0d498ca6897e3d88348fec method=POST endpoint=/login status=200 duration_ms=107.96 user=anonymous ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=f8c025ecadf64f498e0473d12e3bcef0 method=POST endpoint=/login status=200 duration_ms=99.34 user=anonymous ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=13fc894f99ba463e926523063953a9dc method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=20.623 user=admin ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=513ae0e5ca9042eaa1f99d275c582215 method=GET endpoint=/orders/{order_id} status=200 duration_ms=6.713 user=alice ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=d64b0c436c194fb1960c4a8a6887ef4d method=GET endpoint=/orders/{order_id} status=403 duration_ms=6.984 user=alice ip=testclient
+2026-07-29T15:30:31+0530 | INFO | api-sentinel.middleware | request_id=675f3594b7464aee82658f172ea77046 method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=5.273 user=admin ip=testclient
+2026-07-29T15:31:07+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:31:07+0530 | INFO | api-sentinel.middleware | request_id=db23119980cc4a26a659733ab409f9c8 method=POST endpoint=/login status=200 duration_ms=140.825 user=anonymous ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=8f3de4125c614b40a04ead093a33257b method=POST endpoint=/login status=200 duration_ms=120.359 user=anonymous ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=7444aca216854c0ea93fed7702c017d1 method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=35.947 user=admin ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=40d510642df740a68191b0e078eacbc6 method=GET endpoint=/orders/{order_id} status=200 duration_ms=18.018 user=alice ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=ec3697d48fb043aba8e9af56d481eb0a method=GET endpoint=/orders/{order_id} status=403 duration_ms=13.555 user=alice ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=48edcd8d28de424885d25a1b8034d2cf method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=13.728 user=admin ip=testclient
+2026-07-29T15:31:08+0530 | INFO | api-sentinel.middleware | request_id=139287997b784b139bbaf5dbec99a27e method=GET endpoint=/api/security/user/{user_id}/access-map status=200 duration_ms=11.029 user=admin ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.app | API-Sentinel backend initialized.
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=c3e27b3e2104458b95ac0df2f57ac63f method=POST endpoint=/login status=200 duration_ms=74.528 user=anonymous ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=bb734e36205f4799a590f0a7b287cb57 method=POST endpoint=/login status=200 duration_ms=71.509 user=anonymous ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=7bc0b85a732c40b0a93714e33495f8be method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=18.398 user=admin ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=f62dcb07bddc4e78a6786290d73bf282 method=GET endpoint=/orders/{order_id} status=200 duration_ms=5.032 user=alice ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=6dbc73a411464837a12a0ea4976c7865 method=GET endpoint=/orders/{order_id} status=403 duration_ms=4.457 user=alice ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=f6aab315c228454cb2eba0941d14c10d method=GET endpoint=/api/security/bola-alerts status=200 duration_ms=3.326 user=admin ip=testclient
+2026-07-29T15:31:32+0530 | INFO | api-sentinel.middleware | request_id=c2eb9e163871458fb803c91033f11cbf method=GET endpoint=/api/security/user/{user_id}/access-map status=200 duration_ms=6.731 user=admin ip=testclient

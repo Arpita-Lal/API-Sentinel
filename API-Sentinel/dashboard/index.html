@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API-Sentinel Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: bold; }
+        .table-responsive { max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">🛡️ API-Sentinel</a>
+        <div class="d-flex">
+            <input id="adminToken" type="password" class="form-control form-control-sm me-2" placeholder="Admin JWT Token">
+            <button class="btn btn-outline-light btn-sm" onclick="fetchData()">Refresh</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div id="errorBox" class="alert alert-danger d-none"></div>
+
+    <!-- Stats Row -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Requests</h5>
+                    <h2 id="totalRequests">--</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">Security Alerts</h5>
+                    <h2 id="totalAlerts">--</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Active Users (1h)</h5>
+                    <h2 id="activeUsers">--</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Alerts -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">Security Alerts</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Level</th>
+                                    <th>Reason</th>
+                                    <th>User ID</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Logs -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Recent Requests</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Endpoint</th>
+                                    <th>Status</th>
+                                    <th>User</th>
+                                    <th>IP</th>
+                                    <th>Time (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- API Inventory -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">API Inventory</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function apiCall(path) {
+    const token = document.getElementById('adminToken').value;
+    if (!token) {
+        throw new Error("Please enter an Admin JWT token in the navbar.");
+    }
+    const res = await fetch(path, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || err.error || res.statusText);
+    }
+    return res.json();
+}
+
+async function fetchData() {
+    const errorBox = document.getElementById('errorBox');
+    errorBox.classList.add('d-none');
+    try {
+        // Fetch Stats
+        const stats = await apiCall('/api/stats');
+        document.getElementById('totalRequests').innerText = stats.total_requests;
+        document.getElementById('totalAlerts').innerText = stats.total_alerts;
+        document.getElementById('activeUsers').innerText = stats.active_users;
+
+        // Fetch Alerts
+        const alerts = await apiCall('/api/alerts');
+        const alertsBody = document.getElementById('alertsTableBody');
+        alertsBody.innerHTML = '';
+        alerts.data.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${new Date(a.timestamp).toLocaleTimeString()}</td>
+                <td><span class="badge ${a.level === 'HIGH' || a.level === 'CRITICAL' ? 'bg-danger' : 'bg-warning'}">${a.level}</span></td>
+                <td>${a.reason}</td>
+                <td>${a.user_id || 'N/A'}</td>
+                <td>${a.details}</td>
+            `;
+            alertsBody.appendChild(tr);
+        });
+
+        // Fetch Logs
+        const logs = await apiCall('/api/logs');
+        const logsBody = document.getElementById('logsTableBody');
+        logsBody.innerHTML = '';
+        logs.data.forEach(l => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="badge bg-secondary">${l.method}</span></td>
+                <td>${l.endpoint}</td>
+                <td><span class="badge ${l.status_code < 400 ? 'bg-success' : 'bg-danger'}">${l.status_code}</span></td>
+                <td>${l.user_id || '-'}</td>
+                <td>${l.ip_address}</td>
+                <td>${Math.round(l.response_time_ms)}</td>
+            `;
+            logsBody.appendChild(tr);
+        });
+
+        // Fetch Inventory
+        const inv = await apiCall('/api/inventory');
+        const invBody = document.getElementById('inventoryTableBody');
+        invBody.innerHTML = '';
+        inv.data.forEach(i => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i.endpoint}</td>
+                <td><span class="badge ${i.status === 'Known' ? 'bg-success' : (i.status === 'Old' ? 'bg-warning text-dark' : 'bg-danger')}">${i.status}</span></td>
+            `;
+            invBody.appendChild(tr);
+        });
+
+    } catch (err) {
+        errorBox.innerText = err.message;
+        errorBox.classList.remove('d-none');
+    }
+}
+</script>
+</body>
+</html>

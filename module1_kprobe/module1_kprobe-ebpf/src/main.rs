@@ -1,5 +1,12 @@
 #![no_std]
 #![no_main]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
+#![allow(unused_unsafe)]
+#![allow(unsafe_op_in_unsafe_fn)]
 
 mod vmlinux;
 
@@ -10,7 +17,7 @@ use aya_ebpf::{
     maps::{HashMap, PerfEventArray, PerCpuArray},
 };
 use module1_kprobe_common::TcpEvent;
-use crate::vmlinux::{sock, sock_common, msghdr, iov_iter, iovec};
+use crate::vmlinux::{sock, sock_common, msghdr, iov_iter};
 
 #[map]
 static TCP_EVENTS: PerfEventArray<TcpEvent> = PerfEventArray::new(0);
@@ -29,28 +36,28 @@ struct ConnectionContext {
 static RECV_CONTEXT: HashMap<u64, ConnectionContext> = HashMap::with_max_entries(1024, 0);
 
 #[inline(always)]
-unsafe fn get_iov_data(iter: &iov_iter) -> Option<(*const u8, usize)> {
-    // 1. Try ubuf (direct user pointer for single buffer)
-    let ubuf = iter.__bindgen_anon_1.__bindgen_anon_1.__bindgen_anon_1.ubuf;
-    if !ubuf.is_null() {
-        let count = iter.__bindgen_anon_1.__bindgen_anon_1.count;
-        return Some((ubuf as *const u8, count));
-    }
+fn get_iov_data(iter: &iov_iter) -> Option<(*const u8, usize)> {
+    unsafe {
+        // 1. Try ubuf (direct user pointer for single buffer)
+        let ubuf = iter.__bindgen_anon_1.__bindgen_anon_1.__bindgen_anon_1.ubuf;
+        if !ubuf.is_null() {
+            let count = iter.__bindgen_anon_1.__bindgen_anon_1.count;
+            return Some((ubuf as *const u8, count));
+        }
 
-    // 2. Try __iov (pointer to array of iovec)
-    let iov_ptr = iter.__bindgen_anon_1.__bindgen_anon_1.__bindgen_anon_1.__iov;
-    if !iov_ptr.is_null() {
-        if let Ok(iov) = bpf_probe_read_kernel(iov_ptr) {
-            if !iov.iov_base.is_null() && iov.iov_len > 0 {
-                return Some((iov.iov_base as *const u8, iov.iov_len as usize));
+        // 2. Try __iov (pointer to array of iovec)
+        let iov_ptr = iter.__bindgen_anon_1.__bindgen_anon_1.__bindgen_anon_1.__iov;
+        if !iov_ptr.is_null() {
+            if let Ok(iov) = bpf_probe_read_kernel(iov_ptr) {
+                if !iov.iov_base.is_null() && iov.iov_len > 0 {
+                    return Some((iov.iov_base as *const u8, iov.iov_len as usize));
+                }
             }
         }
+
+        None
     }
-
-    None
 }
-
-
 
 #[kprobe]
 pub fn module1_kprobe(ctx: ProbeContext) -> u32 {
@@ -94,7 +101,7 @@ fn try_module1_kprobe(ctx: ProbeContext) -> Result<u32, u32> {
         return Ok(0);
     }
     
-    let event_ptr = unsafe { TCP_EVENT_SCRATCH.get_ptr_mut(0) };
+    let event_ptr = TCP_EVENT_SCRATCH.get_ptr_mut(0);
     let event = match event_ptr {
         Some(ptr) => unsafe { &mut *ptr },
         None => return Ok(0),
@@ -108,7 +115,7 @@ fn try_module1_kprobe(ctx: ProbeContext) -> Result<u32, u32> {
     event.payload_len = 0;
 
     if size > 0 {
-        if let Some((user_ptr, _)) = unsafe { get_iov_data(&msghdr_val.msg_iter) } {
+        if let Some((user_ptr, _)) = get_iov_data(&msghdr_val.msg_iter) {
             let read_len = if size < 1024 { size } else { 1024 };
             if unsafe { aya_ebpf::helpers::bpf_probe_read_user_buf(user_ptr, &mut event.payload[..read_len]) }.is_ok() {
                 event.payload_len = read_len as u32;
@@ -116,7 +123,7 @@ fn try_module1_kprobe(ctx: ProbeContext) -> Result<u32, u32> {
         }
     }
 
-    unsafe { TCP_EVENTS.output(&ctx, event, 0) };
+    TCP_EVENTS.output(&ctx, event, 0);
 
     Ok(0)
 }
@@ -195,7 +202,7 @@ fn try_module1_kretprobe_recv(ctx: RetProbeContext) -> Result<u32, u32> {
             return Ok(0);
         }
 
-        let event_ptr = unsafe { TCP_EVENT_SCRATCH.get_ptr_mut(0) };
+        let event_ptr = TCP_EVENT_SCRATCH.get_ptr_mut(0);
         let event = match event_ptr {
             Some(ptr) => unsafe { &mut *ptr },
             None => return Ok(0),
@@ -209,7 +216,7 @@ fn try_module1_kretprobe_recv(ctx: RetProbeContext) -> Result<u32, u32> {
         event.payload_len = 0;
 
         if size > 0 {
-            if let Some((user_ptr, _)) = unsafe { get_iov_data(&msghdr_val.msg_iter) } {
+            if let Some((user_ptr, _)) = get_iov_data(&msghdr_val.msg_iter) {
                 let read_len = if size < 1024 { size } else { 1024 };
                 if unsafe { aya_ebpf::helpers::bpf_probe_read_user_buf(user_ptr, &mut event.payload[..read_len]) }.is_ok() {
                     event.payload_len = read_len as u32;
@@ -217,7 +224,7 @@ fn try_module1_kretprobe_recv(ctx: RetProbeContext) -> Result<u32, u32> {
             }
         }
 
-        unsafe { TCP_EVENTS.output(&ctx, event, 0) };
+        TCP_EVENTS.output(&ctx, event, 0);
     }
     Ok(0)
 }

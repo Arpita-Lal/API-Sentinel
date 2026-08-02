@@ -75,6 +75,7 @@ async fn main() -> anyhow::Result<()> {
                                 "{{\"src_ip\": \"{}\", \"dest_ip\": \"{}\", \"src_port\": {}, \"dest_port\": {}, \"direction\": \"{}\", \"payload_len\": {}, \"payload_hex\": \"{}\"}}",
                                 src_ip, dest_ip, event.src_port, event.dest_port, direction, payload_len, payload_hex
                             );
+                            let _ = std::io::Write::flush(&mut std::io::stdout());
                         }
                         PerfEvent::Lost { count } => {
                             warn!("Lost {} events", count);

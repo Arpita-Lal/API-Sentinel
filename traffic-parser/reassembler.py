@@ -33,6 +33,12 @@ class StreamReassembler:
         session = self.sessions[conn_key]
         completed: List[APITransaction] = []
 
+        # Handle loopback duplication: if client and server are on the same machine,
+        # we capture both send and recv for the same packet. We only need one.
+        if conn_key.client_ip == conn_key.server_ip:
+            if packet.direction == "recv":
+                return [] # Ignore duplicate loopback receives
+
         is_req = packet.is_request(self.server_port_hint)
 
         if is_req:

@@ -5,6 +5,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/api/test':
             body = b'{"status": "ok", "message": "this is a shadow API"}'
+        elif self.path.startswith('/api/documents/'):
+            doc_id = self.path.split('/')[-1]
+            body = f'{{"status": "ok", "document": "{doc_id}", "data": "confidential"}}'.encode('utf-8')
         else:
             body = b'{"status": "ok", "message": "hello world"}'
             
@@ -18,7 +21,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
         
-        response_body = b'{"status": "received", "data": ' + post_data + b'}'
+        if self.path.startswith('/api/documents/'):
+            doc_id = self.path.split('/')[-1]
+            response_body = f'{{"status": "created", "document": "{doc_id}"}}'.encode('utf-8')
+        else:
+            response_body = b'{"status": "received", "data": ' + post_data + b'}'
+            
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Content-Length', str(len(response_body)))

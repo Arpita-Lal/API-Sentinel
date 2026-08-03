@@ -4,6 +4,8 @@ import subprocess
 import sys
 from ingestor import read_packet_stream, parse_packet_json
 from reassembler import StreamReassembler
+from discovery import DiscoveryEngine
+from bola_engine import BOLAEngine
 
 
 def main():
@@ -16,8 +18,8 @@ def main():
     args = parser.parse_args()
 
     reassembler = StreamReassembler(server_port_hint=args.port)
-    from discovery import DiscoveryEngine
     discovery_engine = DiscoveryEngine(official_spec_path=args.spec, output_schema_path=args.output_schema)
+    bola_engine = BOLAEngine()
 
     def handle_line(line: str):
         packet = parse_packet_json(line)
@@ -25,6 +27,7 @@ def main():
             txns = reassembler.process_packet(packet)
             for txn in txns:
                 discovery_engine.process_transaction(txn)
+                bola_engine.process_transaction(txn)
                 indent = 2 if args.pretty else None
                 print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 
@@ -57,6 +60,7 @@ def main():
     remaining = reassembler.flush()
     for txn in remaining:
         discovery_engine.process_transaction(txn)
+        bola_engine.process_transaction(txn)
         indent = 2 if args.pretty else None
         print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 

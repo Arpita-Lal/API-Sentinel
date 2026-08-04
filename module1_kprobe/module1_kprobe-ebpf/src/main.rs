@@ -11,8 +11,9 @@
 mod vmlinux;
 
 use aya_ebpf::{
-    macros::{kprobe, kretprobe, map}, 
-    programs::{ProbeContext, RetProbeContext},
+    macros::{kprobe, kretprobe, map, xdp}, 
+    programs::{ProbeContext, RetProbeContext, XdpContext},
+    bindings::xdp_action,
     helpers::{bpf_probe_read_kernel, bpf_get_current_pid_tgid},
     maps::{HashMap, PerfEventArray, PerCpuArray},
 };
@@ -24,6 +25,30 @@ static TCP_EVENTS: PerfEventArray<TcpEvent> = PerfEventArray::new(0);
 
 #[map]
 static TCP_EVENT_SCRATCH: PerCpuArray<TcpEvent> = PerCpuArray::with_max_entries(1, 0);
+
+#[map]
+static BLOCKLIST: HashMap<u32, u32> = HashMap::with_max_entries(1024, 0);
+
+#[xdp]
+pub fn xdp_blocker(ctx: XdpContext) -> u32 {
+    let data = ctx.data();
+    let data_end = ctx.data_end();
+
+    if data + 34 > data_end {
+        return xdp_action::XDP_PASS;
+    }
+
+    let eth_proto = unsafe { core::ptr::read_unaligned((data + 12) as *const u16).to_be() };
+
+    if eth_proto == 0x0800 { // IPv4
+        let src_ip = unsafe { core::ptr::read_unaligned((data + 26) as *const u32) };
+        if unsafe { BLOCKLIST.get(&src_ip) }.is_some() {
+            return xdp_action::XDP_DROP;
+        }
+    }
+    
+    xdp_action::XDP_PASS
+}
 
 #[repr(C)]
 #[derive(Copy, Clone)]

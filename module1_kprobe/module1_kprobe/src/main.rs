@@ -38,50 +38,6 @@ async fn main() -> anyhow::Result<()> {
     for cpu_id in online_cpus().unwrap() {
         let buf = perf_array.open(cpu_id, None)?;
 
-        tokio::task::spawn(async move {
-            let mut async_buf = AsyncFd::with_interest(buf, Interest::READABLE).unwrap();
-
-            loop {
-                let mut guard = async_buf.readable_mut().await.unwrap();
-                guard.get_inner_mut().for_each(|event| {
-                    match event {
-                        PerfEvent::Sample { head, tail } => {
-                            let mut event_bytes = Vec::with_capacity(head.len() + tail.len());
-                            event_bytes.extend_from_slice(head);
-                            event_bytes.extend_from_slice(tail);
-                            
-                            if event_bytes.len() < std::mem::size_of::<TcpEvent>() {
-                                return;
-                            }
-                            
-                            let ptr = event_bytes.as_ptr() as *const TcpEvent;
-                            let event = unsafe { ptr.read_unaligned() };
-                            
-                            let src_ip = Ipv4Addr::from(event.src_ip.to_be());
-                            let dest_ip = Ipv4Addr::from(event.dest_ip.to_be());
-                            
-                            let direction = if event.direction == 0 { "send" } else { "recv" };
-                            let payload_len = event.payload_len as usize;
-                            let payload = &event.payload[..payload_len];
-                            
-                            // Simple hex encoding
-                            let mut payload_hex = String::with_capacity(payload_len * 2);
-                            for b in payload {
-                                payload_hex.push_str(&format!("{:02x}", b));
-                            }
-                            
-                            // Output structured JSON
-                            println!(
-                                "{{\"src_ip\": \"{}\", \"dest_ip\": \"{}\", \"src_port\": {}, \"dest_port\": {}, \"direction\": \"{}\", \"payload_len\": {}, \"payload_hex\": \"{}\"}}",
-                                src_ip, dest_ip, event.src_port, event.dest_port, direction, payload_len, payload_hex
-                            );
-                            let _ = std::io::Write::flush(&mut std::io::stdout());
-                        }
-                        PerfEvent::Lost { count } => {
-                            warn!("Lost {} events", count);
-                        }
-                    }
-                });
                 guard.clear_ready();
             }
         });
@@ -97,6 +53,14 @@ async fn main() -> anyhow::Result<()> {
     let recv_exit: &mut KProbe = ebpf.program_mut("module1_kretprobe_recv").unwrap().try_into()?;
     recv_exit.load()?;
     recv_exit.attach("tcp_recvmsg", 0)?;
+
+    // Attach XDP program
+    let xdp: &mut aya::programs::Xdp = ebpf.program_mut("xdp_blocker").unwrap().try_into()?;
+    xdp.load()?;
+    xdp.attach("lo", aya::programs::XdpMode::default())
+        .expect("Failed to attach XDP to 'lo' interface");
+
+
 
     let ctrl_c = signal::ctrl_c();
     println!("Waiting for Ctrl-C...");

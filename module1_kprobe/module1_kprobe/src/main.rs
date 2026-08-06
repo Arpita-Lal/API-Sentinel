@@ -38,6 +38,50 @@ async fn main() -> anyhow::Result<()> {
     for cpu_id in online_cpus().unwrap() {
         let buf = perf_array.open(cpu_id, None)?;
 
+        tokio::task::spawn(async move {
+            let mut async_buf = AsyncFd::with_interest(buf, Interest::READABLE).unwrap();
+
+            loop {
+                let mut guard = async_buf.readable_mut().await.unwrap();
+                guard.get_inner_mut().for_each(|event| {
+                    match event {
+                        PerfEvent::Sample { head, tail } => {
+                            let mut event_bytes = Vec::with_capacity(head.len() + tail.len());
+                            event_bytes.extend_from_slice(head);
+                            event_bytes.extend_from_slice(tail);
+                            
+                            if event_bytes.len() < std::mem::size_of::<TcpEvent>() {
+                                return;
+                            }
+                            
+                            let ptr = event_bytes.as_ptr() as *const TcpEvent;
+                            let event = unsafe { ptr.read_unaligned() };
+                            
+                            let src_ip = Ipv4Addr::from(event.src_ip.to_be());
+                            let dest_ip = Ipv4Addr::from(event.dest_ip.to_be());
+                            
+                            let direction = if event.direction == 0 { "send" } else { "recv" };
+                            let payload_len = event.payload_len as usize;
+                            let payload = &event.payload[..payload_len];
+                            
+                            // Simple hex encoding
+                            let mut payload_hex = String::with_capacity(payload_len * 2);
+                            for b in payload {
+                                payload_hex.push_str(&format!("{:02x}", b));
+                            }
+                            
+                            // Output structured JSON
+                            println!(
+                                "{{\"src_ip\": \"{}\", \"dest_ip\": \"{}\", \"src_port\": {}, \"dest_port\": {}, \"direction\": \"{}\", \"payload_len\": {}, \"payload_hex\": \"{}\"}}",
+                                src_ip, dest_ip, event.src_port, event.dest_port, direction, payload_len, payload_hex
+                            );
+                            let _ = std::io::Write::flush(&mut std::io::stdout());
+                        }
+                        PerfEvent::Lost { count } => {
+                            warn!("Lost {} events", count);
+                        }
+                    }
+                });
                 guard.clear_ready();
             }
         });
@@ -60,7 +104,36 @@ async fn main() -> anyhow::Result<()> {
     xdp.attach("lo", aya::programs::XdpMode::default())
         .expect("Failed to attach XDP to 'lo' interface");
 
+    // Unix Domain Socket for blocking IPs
+    let blocklist_map = ebpf.take_map("BLOCKLIST").unwrap();
+    let mut blocklist = aya::maps::HashMap::try_from(blocklist_map)?;
 
+    tokio::task::spawn(async move {
+        let sock_path = "/tmp/api_sentinel.sock";
+        let _ = std::fs::remove_file(sock_path);
+        let listener = tokio::net::UnixListener::bind(sock_path).expect("Failed to bind socket");
+        
+        loop {
+            if let Ok((mut stream, _)) = listener.accept().await {
+                let mut buf = [0; 1024];
+                if let Ok(n) = stream.try_read(&mut buf) {
+                    if let Ok(cmd) = std::str::from_utf8(&buf[..n]) {
+                        let cmd = cmd.trim();
+                        if cmd.starts_with("BLOCK ") {
+                            let ip_str = &cmd[6..];
+                            if let Ok(ip) = ip_str.parse::<Ipv4Addr>() {
+                                let ip_u32 = u32::from(ip).to_be();
+                                // Store 1 to indicate blocked
+                                if blocklist.insert(ip_u32, 1u32, 0).is_ok() {
+                                    eprintln!("[eBPF] Actively dropping traffic from: {}", ip);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
 
     let ctrl_c = signal::ctrl_c();
     println!("Waiting for Ctrl-C...");

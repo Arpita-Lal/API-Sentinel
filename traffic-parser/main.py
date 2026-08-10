@@ -30,6 +30,7 @@ def main():
             for txn in txns:
                 discovery_engine.process_transaction(txn)
                 bola_engine.process_transaction(txn)
+                rate_limiter.process_transaction(txn)
                 indent = 2 if args.pretty else None
                 print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 
@@ -63,6 +64,7 @@ def main():
     for txn in remaining:
         discovery_engine.process_transaction(txn)
         bola_engine.process_transaction(txn)
+        rate_limiter.process_transaction(txn)
         indent = 2 if args.pretty else None
         print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 

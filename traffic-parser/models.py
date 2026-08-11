@@ -79,8 +79,20 @@ class APITransaction:
     request: HTTPRequest
     response: Optional[HTTPResponse] = None
     latency_ms: Optional[float] = None
+    threat_type: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
+        from data_masker import DataMasker
+        
+        req_json = DataMasker.mask_json(self.request.json_body) if self.request.json_body else None
+        req_raw = DataMasker.mask_string(self.request.body.decode("utf-8", errors="replace")) if self.request.body else None
+        
+        res_json = None
+        res_raw = None
+        if self.response:
+            res_json = DataMasker.mask_json(self.response.json_body) if self.response.json_body else None
+            res_raw = DataMasker.mask_string(self.response.body.decode("utf-8", errors="replace")) if self.response.body else None
+            
         return {
             "client": f"{self.connection_key.client_ip}:{self.connection_key.client_port}",
             "server": f"{self.connection_key.server_ip}:{self.connection_key.server_port}",
@@ -89,15 +101,17 @@ class APITransaction:
                 "path": self.request.path,
                 "version": self.request.version,
                 "headers": self.request.headers,
-                "json_body": self.request.json_body,
-                "raw_body": self.request.body.decode("utf-8", errors="replace") if self.request.body else None,
+                "json_body": req_json,
+                "raw_body": req_raw,
             },
             "response": {
                 "status_code": self.response.status_code,
                 "reason": self.response.reason,
                 "headers": self.response.headers,
-                "json_body": self.response.json_body,
-                "raw_body": self.response.body.decode("utf-8", errors="replace") if self.response.body else None,
+                "json_body": res_json,
+                "raw_body": res_raw,
             } if self.response else None,
             "latency_ms": round(self.latency_ms, 2) if self.latency_ms is not None else None,
+            "threat_type": self.threat_type,
         }
+

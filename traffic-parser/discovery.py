@@ -52,14 +52,17 @@ class DiscoveryEngine:
         # Check against official spec for Shadow API detection
         is_documented = False
         if "paths" in self.official_spec:
-            # We also try to generalize the official spec paths just in case, but typically they already use {} format
-            if gen_path in self.official_spec["paths"] or base_path in self.official_spec["paths"]:
-                path_entry = self.official_spec["paths"].get(gen_path) or self.official_spec["paths"].get(base_path)
-                if method in path_entry:
-                    is_documented = True
+            for spec_path, path_entry in self.official_spec["paths"].items():
+                # Convert OpenAPI path template (e.g. /api/documents/{doc_id}) to regex (^/api/documents/[^/]+$)
+                regex_pattern = re.sub(r'\{[^}]+\}', r'[^/]+', spec_path)
+                if re.match(f"^{regex_pattern}$", base_path):
+                    if method in path_entry:
+                        is_documented = True
+                        break
 
         if not is_documented:
-            print(f"[SHADOW API DETECTED] Unregistered endpoint accessed: {method.upper()} {raw_path} (generalized: {gen_path})", file=sys.stderr)
+            print(f"[SHADOW API DETECTED] Unregistered endpoint accessed: {method.upper()} {raw_path}", file=sys.stderr)
+            txn.threat_type = "SHADOW_API"
 
         # Update discovered schema
         paths = self.discovered_schema["paths"]

@@ -5,7 +5,15 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/": {
+    "/api/documents/{id}": {
+      "post": {
+        "summary": "Discovered POST endpoint",
+        "responses": {
+          "200": {
+            "description": "Auto-discovered response"
+          }
+        }
+      },
       "get": {
         "summary": "Discovered GET endpoint",
         "responses": {
@@ -13,9 +21,11 @@
             "description": "Auto-discovered response"
           }
         }
-      },
-      "post": {
-        "summary": "Discovered POST endpoint",
+      }
+    },
+    "/api/test": {
+      "get": {
+        "summary": "Discovered GET endpoint",
         "responses": {
           "200": {
             "description": "Auto-discovered response"

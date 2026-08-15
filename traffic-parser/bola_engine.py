@@ -47,6 +47,7 @@ class BOLAEngine:
                 if user_id not in self.object_owners[object_id]:
                     # The object exists and is owned by someone else!
                     print(f"\n[BOLA ALERT] User '{user_id}' attempted unauthorized {method} access on Object '{object_id}'!", file=sys.stderr)
+                    txn.threat_type = "BOLA"
             else:
                 # Object is accessed for the first time by this engine, assume ownership
                 self.object_owners[object_id] = {user_id}

@@ -6,7 +6,6 @@ from ingestor import read_packet_stream, parse_packet_json
 from reassembler import StreamReassembler
 from discovery import DiscoveryEngine
 from bola_engine import BOLAEngine
-from rate_limiter import RateLimiter
 
 
 def main():
@@ -21,7 +20,6 @@ def main():
     reassembler = StreamReassembler(server_port_hint=args.port)
     discovery_engine = DiscoveryEngine(official_spec_path=args.spec, output_schema_path=args.output_schema)
     bola_engine = BOLAEngine()
-    rate_limiter = RateLimiter(max_requests=20, time_window_sec=60)
 
     def handle_line(line: str):
         packet = parse_packet_json(line)
@@ -30,7 +28,6 @@ def main():
             for txn in txns:
                 discovery_engine.process_transaction(txn)
                 bola_engine.process_transaction(txn)
-                rate_limiter.process_transaction(txn)
                 indent = 2 if args.pretty else None
                 print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 
@@ -64,7 +61,6 @@ def main():
     for txn in remaining:
         discovery_engine.process_transaction(txn)
         bola_engine.process_transaction(txn)
-        rate_limiter.process_transaction(txn)
         indent = 2 if args.pretty else None
         print(json.dumps(txn.to_dict(), indent=indent), flush=True)
 

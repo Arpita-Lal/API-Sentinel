@@ -98,43 +98,6 @@ async fn main() -> anyhow::Result<()> {
     recv_exit.load()?;
     recv_exit.attach("tcp_recvmsg", 0)?;
 
-    // Attach XDP program
-    let xdp: &mut aya::programs::Xdp = ebpf.program_mut("xdp_blocker").unwrap().try_into()?;
-    xdp.load()?;
-    xdp.attach("lo", aya::programs::XdpMode::default())
-        .expect("Failed to attach XDP to 'lo' interface");
-
-    // Unix Domain Socket for blocking IPs
-    let blocklist_map = ebpf.take_map("BLOCKLIST").unwrap();
-    let mut blocklist = aya::maps::HashMap::try_from(blocklist_map)?;
-
-    tokio::task::spawn(async move {
-        let sock_path = "/tmp/api_sentinel.sock";
-        let _ = std::fs::remove_file(sock_path);
-        let listener = tokio::net::UnixListener::bind(sock_path).expect("Failed to bind socket");
-        
-        loop {
-            if let Ok((mut stream, _)) = listener.accept().await {
-                let mut buf = [0; 1024];
-                if let Ok(n) = stream.try_read(&mut buf) {
-                    if let Ok(cmd) = std::str::from_utf8(&buf[..n]) {
-                        let cmd = cmd.trim();
-                        if cmd.starts_with("BLOCK ") {
-                            let ip_str = &cmd[6..];
-                            if let Ok(ip) = ip_str.parse::<Ipv4Addr>() {
-                                let ip_u32 = u32::from(ip).to_be();
-                                // Store 1 to indicate blocked
-                                if blocklist.insert(ip_u32, 1u32, 0).is_ok() {
-                                    eprintln!("[eBPF] Actively dropping traffic from: {}", ip);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-
     let ctrl_c = signal::ctrl_c();
     println!("Waiting for Ctrl-C...");
     ctrl_c.await?;
